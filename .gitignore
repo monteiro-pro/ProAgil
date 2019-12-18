@@ -9,6 +9,7 @@ bin
 
 ### VisualStudioCode ###
 .vs
+.vscode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
