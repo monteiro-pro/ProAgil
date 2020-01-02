@@ -1,5 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { EventoService } from '../_services/evento.service';
+import { Evento } from '../_models/Evento';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap';
 
 @Component({
   selector: 'app-eventos',
@@ -8,7 +11,20 @@ import { HttpClient } from '@angular/common/http';
 })
 export class EventosComponent implements OnInit {
 
+  eventos: Evento[];
+  eventosFiltrados: Evento[];
+  imagemLargura = 100;
+  imagemMargem = 2;
+  mostrarImagem = false;
+  modalRef: BsModalRef;
+
   filtro: string;
+
+  constructor(
+      private eventoService: EventoService
+    , private modalService: BsModalService
+  ) { }
+
   get filtroLista(): string {
     return this.filtro;
   }
@@ -17,19 +33,15 @@ export class EventosComponent implements OnInit {
     this.eventosFiltrados = this.filtroLista ? this.filtrarEventos(this.filtroLista) : this.eventos;
   }
 
-  eventos: any = [];
-  eventosFiltrados: any = [];
-  imagemLargura = 100;
-  imagemMargem = 2;
-  mostrarImagem = false;
-
-  constructor(private http: HttpClient) { }
+  openModal(template: TemplateRef<any>) {
+    this.modalRef = this.modalService.show(template);
+  }
 
   ngOnInit() {
     this.getEventos();
   }
 
-  filtrarEventos(filtrarPor: string): any {
+  filtrarEventos(filtrarPor: string): Evento[] {
     filtrarPor = filtrarPor.toLocaleLowerCase();
     return this.eventos.filter(
       evento => evento.tema.toLocaleLowerCase().indexOf(filtrarPor) !== -1
@@ -37,14 +49,15 @@ export class EventosComponent implements OnInit {
   }
 
   alternarImagem() {
-    this.mostrarImagem = !this.mostrarImagem;
+    this.mostrarImagem = !this.mostrarImagem; 
   }
 
   getEventos() {
-    this.http.get('http://localhost:5000/api/Eventos').subscribe(response => {
-      this.eventos = response;
-      this.eventosFiltrados = response;
-      console.log(this.eventos);
+    this.eventoService.getAllEvento().subscribe(
+      (_eventos: Evento[]) => {
+      this.eventos = _eventos;
+      this.eventosFiltrados = this.eventos;
+      console.log(_eventos);
     }, error => {
       console.log(error);
     });
